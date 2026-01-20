@@ -4,12 +4,13 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
-import { loginSchema, signupSchema } from '@/lib/schemas' // <--- Import from lib
+import { loginSchema, signupSchema } from '@/lib/schemas'
 
+// Login remains the same (it should redirect)
 export async function login(formData: z.infer<typeof loginSchema>) {
   const supabase = await createClient()
-
   const result = loginSchema.safeParse(formData)
+  
   if (!result.success) {
     return { error: "Invalid data" }
   }
@@ -27,6 +28,7 @@ export async function login(formData: z.infer<typeof loginSchema>) {
   redirect('/dashboard')
 }
 
+// UPDATE THIS FUNCTION
 export async function signup(formData: z.infer<typeof signupSchema>) {
   const supabase = await createClient()
 
@@ -35,13 +37,16 @@ export async function signup(formData: z.infer<typeof signupSchema>) {
     return { error: "Invalid data" }
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: result.data.email,
     password: result.data.password,
     options: {
       data: {
         full_name: result.data.fullName,
       },
+      // IMPORTANT: This tells Supabase where to send the user after they click the link
+      // Make sure your site URL is set correctly in Supabase settings
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`, 
     },
   })
 
@@ -49,6 +54,8 @@ export async function signup(formData: z.infer<typeof signupSchema>) {
     return { error: error.message }
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  // STOP: Do not redirect here. 
+  // If email confirmation is on, data.session will be null.
+  // We return success: true to tell the frontend to show the toast.
+  return { success: true } 
 }
