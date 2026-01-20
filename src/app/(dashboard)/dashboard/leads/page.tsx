@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Search, Filter, Inbox } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Search, Filter, Inbox, FileText } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { LeadSheet } from "@/components/leads/lead-sheet"
 
@@ -19,38 +19,46 @@ export default async function LeadsPage() {
     }
 
     return (
-        <div className="flex flex-col h-full space-y-6">
-            {/* Page Header */}
+        <div className="flex flex-col h-full w-full space-y-8">
+            {/* Page Header - No border line as requested */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                    <h2 className="text-2xl font-bold tracking-tight text-[#00334E]">Leads</h2>
-                    <p className="text-sm text-muted-foreground mt-1">
-                        Manage and track your potential clients.
+                <div className="space-y-1">
+                    <h2 className="text-3xl font-bold tracking-tight text-[#00334E]">Leads</h2>
+                    <p className="text-sm text-muted-foreground">
+                        Manage your sales pipeline and track potential clients.
                     </p>
                 </div>
-                <div className="self-end sm:self-auto">
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" className="hidden sm:flex">
+                        <FileText className="mr-2 h-4 w-4" /> Export
+                    </Button>
                     <LeadSheet />
                 </div>
             </div>
 
             {/* Main Content Card */}
             <Card className="flex-1 flex flex-col border shadow-sm bg-white overflow-hidden">
-                <CardHeader className="border-b bg-gray-50/40 px-6 py-4">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <CardTitle className="text-base font-semibold text-gray-800 whitespace-nowrap">
-                            All Leads
-                        </CardTitle>
+                <CardHeader className="border-b px-6 py-5 space-y-0">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="space-y-1">
+                            <CardTitle>All Leads</CardTitle>
+                            <CardDescription>
+                                A list of all your leads and their current status.
+                            </CardDescription>
+                        </div>
 
                         {/* Search & Filter Controls */}
-                        <div className="flex items-center gap-2 w-full sm:w-auto">
-                            <div className="relative flex-1 sm:w-72">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
+                        <div className="flex items-center gap-3 w-full md:w-auto">
+                            <div className="relative flex-1 md:w-80">
+                                {/* Icon pushed further right (left-4) and perfectly centered vertically */}
+                                {/* <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /> */}
+                                {/* Padding increased (pl-12) to give space between icon and text */}
                                 <Input
-                                    placeholder="Search by name or company..."
-                                    className="pl-9 bg-white border-gray-200 focus:border-[#00334E] focus:ring-[#00334E]"
+                                    placeholder="Filter leads..."
+                                    className="pl-12 bg-background"
                                 />
                             </div>
-                            <Button variant="outline" size="icon" className="border-gray-200 text-gray-600 hover:bg-gray-50 shrink-0">
+                            <Button variant="outline" size="icon" className="shrink-0">
                                 <Filter className="h-4 w-4" />
                             </Button>
                         </div>
@@ -58,67 +66,68 @@ export default async function LeadsPage() {
                 </CardHeader>
 
                 <CardContent className="p-0 flex-1">
-                    {/* Desktop Table Header - Grid Layout */}
-                    <div className="hidden md:grid md:grid-cols-12 gap-4 border-b border-gray-100 bg-gray-50/50 px-6 py-3 text-xs font-medium uppercase text-gray-500 tracking-wider">
-                        <div className="col-span-4">Name & Company</div>
-                        <div className="col-span-3">Status</div>
-                        <div className="col-span-3">Email</div>
-                        <div className="col-span-2 text-right">Value</div>
+                    {/* Desktop Table Header */}
+                    <div className="hidden md:grid md:grid-cols-12 gap-4 border-b bg-muted/40 px-6 py-3 text-xs font-medium uppercase text-muted-foreground tracking-wider">
+                        <div className="col-span-4 pl-2">Lead Details</div>
+                        <div className="col-span-2">Status</div>
+                        <div className="col-span-4">Contact Info</div>
+                        <div className="col-span-2 text-right pr-2">Est. Value</div>
                     </div>
 
                     {/* Leads List */}
-                    <div className="divide-y divide-gray-100">
+                    <div className="divide-y divide-border">
                         {leads && leads.length > 0 ? (
                             leads.map((lead) => (
                                 <div
                                     key={lead.id}
-                                    className="grid grid-cols-2 md:grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-gray-50/30 transition-colors group cursor-pointer"
+                                    className="grid grid-cols-2 md:grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-muted/30 transition-colors group cursor-pointer"
                                 >
-                                    {/* Name & Company (Mobile: Col 1, Desktop: Col 1-4) */}
-                                    <div className="col-span-1 md:col-span-4 flex flex-col justify-center min-w-0">
-                                        <p className="font-semibold text-sm text-gray-900 truncate">
-                                            {lead.first_name} {lead.last_name}
-                                        </p>
-                                        <p className="text-xs text-gray-500 truncate mt-0.5">
-                                            {lead.company || "No Company"}
-                                        </p>
-
-                                        {/* Mobile Status Badge */}
-                                        <div className="md:hidden mt-2">
-                                            <StatusBadge status={lead.status} />
+                                    {/* Lead Details (Name & Company) */}
+                                    <div className="col-span-2 md:col-span-4 flex items-center gap-3 min-w-0 pl-2">
+                                        <div className="h-9 w-9 rounded-full bg-[#00334E]/10 flex items-center justify-center text-[#00334E] font-medium text-xs shrink-0">
+                                            {lead.first_name[0]}{lead.last_name[0]}
+                                        </div>
+                                        <div className="flex flex-col min-w-0">
+                                            <p className="font-medium text-sm text-foreground truncate">
+                                                {lead.first_name} {lead.last_name}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground truncate">
+                                                {lead.company || "No Company"}
+                                            </p>
                                         </div>
                                     </div>
 
-                                    {/* Status (Desktop Only: Col 5-7) */}
-                                    <div className="hidden md:flex md:col-span-3 items-center">
+                                    {/* Status Badge */}
+                                    <div className="col-span-2 md:col-span-2 flex items-center md:justify-start">
                                         <StatusBadge status={lead.status} />
                                     </div>
 
-                                    {/* Email (Desktop Only: Col 8-10) */}
-                                    <div className="hidden md:flex md:col-span-3 items-center text-sm text-gray-500 truncate">
-                                        {lead.email}
+                                    {/* Contact Info (Desktop Only) */}
+                                    <div className="hidden md:flex md:col-span-4 flex-col justify-center min-w-0">
+                                        <p className="text-sm text-foreground truncate">{lead.email}</p>
+                                        {lead.phone && (
+                                            <p className="text-xs text-muted-foreground truncate">{lead.phone}</p>
+                                        )}
                                     </div>
 
-                                    {/* Value (Mobile: Col 2, Desktop: Col 11-12) */}
-                                    <div className="col-span-1 md:col-span-2 flex flex-col justify-center items-end">
-                                        <span className="font-semibold text-sm text-gray-900">
+                                    {/* Value */}
+                                    <div className="col-span-2 md:col-span-2 flex flex-col justify-center items-end pr-2">
+                                        <span className="font-semibold text-sm text-foreground">
                                             {new Intl.NumberFormat('en-US', { style: 'currency', currency: lead.currency || 'USD' }).format(lead.value || 0)}
                                         </span>
-                                        <span className="text-[10px] text-gray-400 md:hidden uppercase tracking-wide mt-0.5">Value</span>
                                     </div>
                                 </div>
                             ))
                         ) : (
-                            /* Professional Empty State */
-                            <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                                <div className="bg-gray-50 border-2 border-dashed border-gray-200 p-6 rounded-full mb-4">
-                                    <Inbox className="h-8 w-8 text-gray-400" />
+                            /* Empty State */
+                            <div className="flex flex-col items-center justify-center py-20 px-6 text-center animate-in fade-in-50">
+                                <div className="bg-muted/50 border-2 border-dashed border-muted p-6 rounded-full mb-4">
+                                    <Inbox className="h-10 w-10 text-muted-foreground/50" />
                                 </div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-1">No leads found</h3>
-                                <p className="text-sm text-gray-500 max-w-sm mb-6 leading-relaxed">
-                                    You haven't added any leads yet. Start by creating a new lead to populate your sales pipeline.
+                                <h3 className="text-lg font-semibold text-foreground mb-1">No leads found</h3>
+                                <p className="text-sm text-muted-foreground max-w-sm mb-6">
+                                    Your pipeline is currently empty. Add a new lead to start tracking your sales opportunities.
                                 </p>
-                                {/* We reuse the LeadSheet button here for convenience if desired, or keep it top-only */}
                             </div>
                         )}
                     </div>
@@ -131,14 +140,14 @@ export default async function LeadsPage() {
 // Helper component for consistent status badges
 function StatusBadge({ status }: { status: string }) {
     const styles: Record<string, string> = {
-        'New': 'bg-blue-50 text-blue-700 border-blue-200',
-        'Contacted': 'bg-indigo-50 text-indigo-700 border-indigo-200',
-        'Qualified': 'bg-purple-50 text-purple-700 border-purple-200',
-        'Proposal': 'bg-amber-50 text-amber-700 border-amber-200',
-        'Closed': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        'New': 'bg-blue-100 text-blue-700 border-blue-200',
+        'Contacted': 'bg-indigo-100 text-indigo-700 border-indigo-200',
+        'Qualified': 'bg-purple-100 text-purple-700 border-purple-200',
+        'Proposal': 'bg-amber-100 text-amber-700 border-amber-200',
+        'Closed': 'bg-emerald-100 text-emerald-700 border-emerald-200',
     }
 
-    const defaultStyle = 'bg-gray-50 text-gray-700 border-gray-200'
+    const defaultStyle = 'bg-gray-100 text-gray-700 border-gray-200'
 
     return (
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${styles[status] || defaultStyle}`}>
